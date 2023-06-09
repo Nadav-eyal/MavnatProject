@@ -74,6 +74,13 @@ public class BinomialHeap
      */
     public void meld(BinomialHeap heap2)
     {
+        BinomialHeap merged_heap = this.merge(heap2);
+        BinomialHeap final_heap = merged_heap.unionTrees();
+        this.last =  final_heap.last;
+        this.size =  final_heap.size;
+        this.min =  final_heap.min;
+
+
         return; // should be replaced by student code
     }
 
@@ -155,7 +162,44 @@ public class BinomialHeap
         return mergedHeap;
     }
 
-    public void addHeapNode(HeapNode node)
+    public BinomialHeap unionTrees() {
+        BinomialHeap finalHeap = new BinomialHeap();
+
+        int numTrees = this.numTrees();
+        if (numTrees == 1)
+            return this;
+        if (numTrees == 2) {
+            if (this.last.rank != this.last.next.rank)
+                return this;
+            else
+            {
+                HeapNode temp = HeapNode.link(this.last.next, this.last);
+                finalHeap.addHeapNode(temp);
+            }
+        }
+        HeapNode current = this.last.next;
+        HeapNode next = current.next;
+
+        while (finalHeap.size != this.size)
+        {
+            if (current.rank != next.rank || current.rank == next.rank && next.rank == next.next.rank)
+            {
+                finalHeap.addHeapNode(current);
+                current = next;
+                next = next.next;
+            }
+            else
+            {
+                HeapNode temp = HeapNode.link(current, next);
+                current = temp;
+                next = next.next;
+            }
+        }
+        return finalHeap;
+    }
+
+
+        public void addHeapNode(HeapNode node)
     {
         if (this.empty())
         {
@@ -196,7 +240,7 @@ public class BinomialHeap
             this.rank = 0;
         }
 
-        public HeapNode link(HeapNode x, HeapNode y)
+        public static HeapNode link(HeapNode x, HeapNode y)
         {
             if (x.item.key >= y.item.key)
             {
@@ -204,12 +248,21 @@ public class BinomialHeap
                 x = y;
                 y = temp;
             }
-            y.next = x.child.next;
-            x.child.next = y;
-            y.parent = x;
-            x.child = y;
-            // When linking two Bk's binomial trees the size increases by 1
-            x.rank += 1;
+            if (x.rank == 0)
+            {
+                x.child = y;
+                y.parent = x;
+                x.rank += 1;
+            }
+            else
+            {
+                y.next = x.child.next;
+                x.child.next = y;
+                y.parent = x;
+                x.child = y;
+                // When linking two Bk's binomial trees the size increases by 1
+                x.rank += 1;
+            }
             return x;
         }
     }
@@ -247,10 +300,20 @@ public class BinomialHeap
         item2.node = node2;
         heap1.addHeapNode(node1);
         heap2.addHeapNode(node2);
-        System.out.println(heap1.size + " " + heap1.last.item.key + " " + heap1.min.item.info);
-        System.out.println(heap2.size + " " + heap2.last.item.key + " " + heap2.min.item.info);
-        BinomialHeap mergedHeap = heap2.merge(heap1);
-        System.out.println(mergedHeap.size + " " + mergedHeap.last.item.key + " " + mergedHeap.min.item.info);
+
+        BinomialHeap heap3 = new BinomialHeap();
+        HeapNode node3 = heap3.new HeapNode();
+        HeapItem item3 = heap1.new HeapItem(3, "zayen");
+        node3.item = item3;
+        item3.node = node3;
+        heap3.addHeapNode(node3);
+
+
+        heap1.meld(heap2);
+        heap3.meld(heap1);
+        System.out.println(heap3.size + " " + heap3.min.item.key + " " + heap3.last.child.parent.item.key);
+
+
 
     }
 }
