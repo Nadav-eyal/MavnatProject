@@ -19,9 +19,17 @@ public class BinomialHeap
      * Insert (key,info) into the heap and return the newly generated HeapItem.
      *
      */
-//    public HeapItem insert(int key, String info) {
-//        return;
-//    } // should be replaced by student code
+    public HeapItem insert(int key, String info) {
+        HeapItem item = new HeapItem(key, info);
+        HeapNode node = new HeapNode();
+        node.item = item;
+        item.node = node;
+        BinomialHeap tempHeap = new BinomialHeap();
+        tempHeap.addHeapNode(node);
+        this.meld(tempHeap);
+
+        return item;
+    } // should be replaced by student code
 
 
     /**
@@ -136,27 +144,31 @@ public class BinomialHeap
         while (count1 < numOfTrees1 && count2 < numOfTrees2)
         {
             if (currentHeap1.rank <= currentHeap2.rank) {
+                HeapNode nextHeap1 = currentHeap1.next;
                 mergedHeap.addHeapNode(currentHeap1);
-                currentHeap1 = currentHeap1.next;
+                currentHeap1 = nextHeap1;
                 count1 += 1;
             }
             else
             {
+                HeapNode nextHeap2 = currentHeap2.next;
                 mergedHeap.addHeapNode(currentHeap2);
-                currentHeap2 = currentHeap2.next;
+                currentHeap2 = nextHeap2;
                 count2 += 1;
             }
         }
         while (count1 < numOfTrees1)
         {
+            HeapNode nextHeap1 = currentHeap1.next;
             mergedHeap.addHeapNode(currentHeap1);
-            currentHeap1 = currentHeap1.next;
+            currentHeap1 = nextHeap1;
             count1 += 1;
         }
         while (count2 < numOfTrees2)
         {
+            HeapNode nextHeap2 = currentHeap2.next;
             mergedHeap.addHeapNode(currentHeap2);
-            currentHeap2 = currentHeap2.next;
+            currentHeap2 = nextHeap2;
             count2 += 1;
         }
         return mergedHeap;
@@ -182,17 +194,27 @@ public class BinomialHeap
 
         while (finalHeap.size != this.size)
         {
-            if (current.rank != next.rank || current.rank == next.rank && next.rank == next.next.rank)
+            if (current.rank != next.rank)
             {
                 finalHeap.addHeapNode(current);
                 current = next;
                 next = next.next;
             }
+
             else
             {
-                HeapNode temp = HeapNode.link(current, next);
-                current = temp;
-                next = next.next;
+                if (current.rank == next.next.rank && next != this.last) {
+                    finalHeap.addHeapNode(current);
+                    current = next;
+                    next = next.next;
+                }
+                else {
+                    HeapNode nextNext = next.next;
+                    HeapNode temp = HeapNode.link(current, next);
+                    current = temp;
+                    next = nextNext;
+                }
+
             }
         }
         return finalHeap;
@@ -310,8 +332,23 @@ public class BinomialHeap
 
 
         heap1.meld(heap2);
-        heap3.meld(heap1);
-        System.out.println(heap3.size + " " + heap3.min.item.key + " " + heap3.last.child.parent.item.key);
+        heap1.insert(6, "hi");
+        heap1.insert(7, "hipify");
+        //heap3.meld(heap1);
+        //System.out.println(heap3.size + " " + heap3.min.item.key + " " + heap3.last.child.parent.item.key);
+
+        heap3.insert(0, "failure");
+        heap3.insert(4, "another");
+        heap3.insert(5, "boom");
+        heap3.insert(8, "p");
+        heap3.insert(9, "f");
+        heap3.insert(10, "d");
+        heap3.insert(-1, "d");
+
+
+
+        System.out.println(heap3.size + " " + heap3.min.item.key + " " + heap3.last.child.item.key + " " + heap3.numTrees());
+
 
 
 
