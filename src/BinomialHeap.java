@@ -1,5 +1,5 @@
-import java.awt.event.WindowFocusListener;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * BinomialHeap
@@ -49,7 +49,7 @@ public class BinomialHeap
         BinomialHeap childrenHeap = this.createChildrenHeap(this.min);
         BinomialHeap detachedHeap = this.detachNode(this.min);
         childrenHeap.meld(detachedHeap);
-        copyHeap(childrenHeap);
+        this.copyHeap(childrenHeap);
     }
 
     public void copyHeap(BinomialHeap heap)
@@ -62,19 +62,18 @@ public class BinomialHeap
     public BinomialHeap createChildrenHeap(HeapNode node)
     {
         BinomialHeap childrenHeap = new BinomialHeap();
+        // We don't have any children
+        if (node.rank == 0)
+            return new BinomialHeap();
         HeapNode current = node.child.next;
-//        System.out.println("Node" + node.item.key);
-//        System.out.println("Chikd" + node.item.key);
-//        System.out.println(node.child.next.item.key);
         HeapNode currentNext;
 
         int count = 0;
         while (count < node.rank)
         {
-            System.out.println(current.rank);
             currentNext = current.next;
+            current.parent = null;
             childrenHeap.addHeapNode(current);
-            //System.out.println(childrenHeap.size);
             current = currentNext;
             count ++;
         }
@@ -95,9 +94,9 @@ public class BinomialHeap
             if (current != node)
             {
                 newHeap.addHeapNode(current);
+                count ++;
             }
             current = currentNext;
-            count ++;
         }
         return newHeap;
     }
@@ -121,7 +120,21 @@ public class BinomialHeap
      */
     public void decreaseKey(HeapItem item, int diff)
     {
-        return; // should be replaced by student code
+        HeapNode current = item.node;
+        item.key -= diff;
+        while (current.parent != null)
+        {
+            if (item.key < current.parent.item.key) {
+                current.item = current.parent.item;
+                current.parent.item = item;
+                current = current.parent;
+                continue;
+            }
+            break;
+        }
+        // Updating the minimum
+        if (item.key < this.min.item.key)
+            this.min = item.node;
     }
 
     /**
@@ -131,7 +144,9 @@ public class BinomialHeap
      */
     public void delete(HeapItem item)
     {
-        return; // should be replaced by student code
+        int reduce = item.key - this.min.item.key + 1;
+        this.decreaseKey(item, reduce);
+        this.deleteMin();
     }
 
     /**
@@ -141,9 +156,16 @@ public class BinomialHeap
      */
     public void meld(BinomialHeap heap2)
     {
-        BinomialHeap merged_heap = this.merge(heap2);
-        BinomialHeap final_heap = merged_heap.unionTrees();
-        copyHeap(final_heap);
+        // If heap2 is empty
+        if (heap2.size == 0)
+            return;
+        if (this.size == 0)
+            this.copyHeap(heap2);
+        else {
+            BinomialHeap merged_heap = this.merge(heap2);
+            BinomialHeap final_heap = merged_heap.unionTrees();
+            this.copyHeap(final_heap);
+        }
     }
 
     /**
@@ -191,9 +213,6 @@ public class BinomialHeap
 
     public BinomialHeap merge(BinomialHeap heap2) {
         BinomialHeap mergedHeap = new BinomialHeap();
-        // If heap2 is empty
-        if (heap2.size == 0)
-            return this;
         HeapNode currentHeap1 = this.last.next, currentHeap2 = heap2.last.next;
         int count1 = 0, count2 = 0;
         int numOfTrees1 = this.numTrees(), numOfTrees2 = heap2.numTrees();
@@ -277,7 +296,6 @@ public class BinomialHeap
         return finalHeap;
     }
 
-
         // Inserting a new binomial tree as the last root to an ordered heap
         public void addHeapNode(HeapNode node)
     {
@@ -298,8 +316,6 @@ public class BinomialHeap
             this.size += (int)Math.pow(2, node.rank);
         }
     }
-
-
 
     /**
      * Class implementing a node in a Binomial Heap.
@@ -413,61 +429,12 @@ public class BinomialHeap
 
 
     public static void main(String[] args){
-//        BinomialHeap heap1 = new BinomialHeap();
-//        BinomialHeap heap2 = new BinomialHeap();
-//        HeapNode node1 = heap1.new HeapNode();
-//        HeapItem item1 = heap1.new HeapItem(1, "hello");
-//        node1.item = item1;
-//        item1.node = node1;
-//        HeapNode node2 = heap2.new HeapNode();
-//        HeapItem item2 = heap2.new HeapItem(2, "saamak");
-//        node2.item = item2;
-//        item2.node = node2;
-//        heap1.addHeapNode(node1);
-//        heap2.addHeapNode(node2);
-//
-//        BinomialHeap heap3 = new BinomialHeap();
-//        HeapNode node3 = heap3.new HeapNode();
-//        HeapItem item3 = heap1.new HeapItem(3, "zayen");
-//        node3.item = item3;
-//        item3.node = node3;
-//        heap3.addHeapNode(node3);
-//
-//
-//        heap1.meld(heap2);
-//        heap1.insert(6, "hi");
-//        heap1.insert(7, "hipify");
-//        heap1.insert(1, "copy");
-//        //heap3.meld(heap1);
-//        //System.out.println(heap3.size + " " + heap3.min.item.key + " " + heap3.last.child.parent.item.key);
-//
-//        heap3.insert(0, "failure");
-//        heap3.insert(4, "another");
-//        heap3.insert(5, "boom");
-//        heap3.insert(8, "p");
-//        heap3.insert(9, "f");
-//        heap3.insert(10, "d");
-//
-//        heap3.meld(heap1);
-        //System.out.println(heap3.size + " " + heap3.min.item.key + " " + heap3.last.rank + " " + heap3.numTrees());
         BinomialHeap heap1 = new BinomialHeap();
-
-        for (int i=0; i<15; i++)
-        {
+        for (int i=0; i<1; i++) {
             heap1.insert(i, String.valueOf(i));
         }
-//        heap1.print();
-//        System.out.println("NUM OF TREES " + heap1.numTrees());
+        heap1.delete(heap1.last.item);
 
-//        BinomialHeap heap2 = new BinomialHeap();
-
-//        for (int i=0; i<1; i++)
-//        {
-//            heap2.insert(i, String.valueOf(i));
-//        }
-//        heap1.meld(new BinomialHeap());
-//        heap1.meld(heap2);
-        heap1.deleteMin();
         heap1.print();
         System.out.println("NUM OF TREES " + heap1.numTrees());
     }
