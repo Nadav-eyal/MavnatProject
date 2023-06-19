@@ -1,7 +1,5 @@
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+
+import java.util.*;
 
 /**
  * BinomialHeap
@@ -18,9 +16,6 @@ public class BinomialHeap
     public HeapNode min;
 
     public int numOfTrees;
-
-    public List<HeapNode> treesList;
-
 
     /**
      *
@@ -39,7 +34,7 @@ public class BinomialHeap
         }
         else {
             BinomialHeap tempHeap = new BinomialHeap();
-            tempHeap.numOfTrees=1;
+            tempHeap.numOfTrees = 1;
             tempHeap.addHeapNode(node);
             this.meld(tempHeap);
         }
@@ -95,7 +90,7 @@ public class BinomialHeap
     public BinomialHeap detachNode(HeapNode node)
     {
         BinomialHeap newHeap = new BinomialHeap();
-        int numOfTrees = this.numTrees();
+        int numOfTrees = this.numOfTrees;
         int count = 0;
         HeapNode current = this.last.next;
         HeapNode currentNext;
@@ -137,7 +132,9 @@ public class BinomialHeap
         {
             if (item.key < current.parent.item.key) {
                 current.item = current.parent.item;
+                current.parent.item.node = current;
                 current.parent.item = item;
+                item.node = current.parent;
                 current = current.parent;
                 continue;
             }
@@ -174,11 +171,10 @@ public class BinomialHeap
             this.copyHeap(heap2);
         else {
             int unionUntilRank = this.merge(heap2);
-            //this.print();
             this.unionTrees(unionUntilRank);
         }
     }
-    
+
 
     /**
      *
@@ -200,7 +196,7 @@ public class BinomialHeap
     {
         if (this.size == 0)
             return true;
-        return false; // should be replaced by student code
+        return false;
     }
 
     /**
@@ -208,31 +204,17 @@ public class BinomialHeap
      * Return the number of trees in the heap.
      *
      */
-    public int numTreeOLD()
-    {
-        if (this.size == 0)
-            return 0;
-
-        int numOfTrees = 1;
-        HeapNode current = this.last.next;
-        while (current != this.last)
-        {
-            numOfTrees += 1;
-            current = current.next;
-        }
-        return numOfTrees;
-    }
     public int numTrees()
     {
-       return this.numOfTrees;
+        return this.numOfTrees;
     }
-    
+
     public int merge(BinomialHeap heap2) {
-        
+
         BinomialHeap mergedHeap = new BinomialHeap();
         BinomialHeap smallRankHeap;
         BinomialHeap bigRankHeap;
-        
+
         if(this.last.rank > heap2.last.rank){
             smallRankHeap = heap2;
             bigRankHeap = this;
@@ -241,15 +223,14 @@ public class BinomialHeap
             smallRankHeap = this;
             bigRankHeap = heap2;
         }
-        
+
         int newSize = smallRankHeap.size + bigRankHeap.size;
         int newNumOfTrees = smallRankHeap.numOfTrees + bigRankHeap.numOfTrees;
         int smallHeapCounter = 0;
         int smallRankHeapMaxTreeRank = smallRankHeap.last.rank;
-        // we return thus?
         HeapNode currentSmallHeapTree = smallRankHeap.last.next;
         HeapNode currentBigHeapTree = bigRankHeap.last.next;
-        
+
         while (smallHeapCounter < smallRankHeap.numTrees())
         {
             if(currentSmallHeapTree.rank <= currentBigHeapTree.rank){
@@ -265,7 +246,7 @@ public class BinomialHeap
             }
 
         }
-        
+
         // now mergedHeap contains the merged start of big with all of small heap
         HeapNode newMin;
         if (mergedHeap.min.item.key <= bigRankHeap.min.item.key){
@@ -282,7 +263,7 @@ public class BinomialHeap
         this.min = newMin;
         this.size = newSize;
         this.numOfTrees = newNumOfTrees;
-        return smallRankHeapMaxTreeRank;
+        return smallRankHeapMaxTreeRank; // we will use this in unionTrees
     }
 
     public void unionTrees(int unionUntilRank) {
@@ -306,68 +287,39 @@ public class BinomialHeap
 
         HeapNode current = this.last.next;
         HeapNode next = current.next;
-//        boolean v_heaps = true;//todo remove - only for debugging
-//        boolean v_actions = true;//todo remove - only for debugging
-//        this.last.next.printNodeList();//todo remove - only for debugging
-//        //todo might not need the last condition of the statement
-        while (((current.rank <= unionUntilRank) || (current.rank== next.rank)) && (current!=this.last))//(unionedHeap.size != this.size)
+        while (((current.rank <= unionUntilRank) || (current.rank== next.rank)) && (current!=this.last))
         {
-//            //todo remove - only for debugging
-//            if(v_heaps) {
-//                System.out.print("unionedHeap: ");
-//                if (!unionedHeap.empty()) {
-//                    unionedHeap.last.next.printNodeList();
-//                } else {
-//                    System.out.println();
-//                }
-
-//                System.out.print("current list: ");
-//                current.printNodeList();
-//                System.out.println("##########################");
-            //}
             if (current.rank != next.rank)
             {
-//                if (v_actions){//todo remove - only for debugging
-//                    System.out.println("1");
-//                }
                 unionedHeap.addHeapNode(current);
                 current = next;
                 next = next.next;
             }
 
             //there are 3 trees with the same rank
-            else if (next != current && next.next != current && current.rank == next.next.rank)
+            else if (next != current && next.next != current && current.rank == next.next.rank && next != this.last)
             {
-//                if (v_actions){//todo remove - only for debugging
-//                    System.out.println("3");
-//                }
                 //in this case we can add the current one and union the next two
                 unionedHeap.addHeapNode(current);
                 current = next;
                 next = next.next;
             }
             //there are 2 trees with the same rank and the third one is of bigger rank, or they are the only trees.
-            else if(next != current && current.rank == next.rank)
+            else if(next != current)
             {
                 // if we are at the end of the heap list (there are only two trees left)
-                if(next == this.last)
+                if (next == this.last)
                 {
-//                    if (v_actions){//todo remove - only for debugging
-//                        System.out.println("2 - end");
-//                    }
                     BinomialHeap lastTreeHeap = new BinomialHeap();
                     lastTreeHeap.addHeapNode(HeapNode.link(current, next));
-                    this.copyHeap(lastTreeHeap);
-                    // TODO: make sure its really not necessary :0
-                    //current = this.last;
+                    this.last = lastTreeHeap.last;
+                    this.numOfTrees--;
+                    current = this.last;
                     break;
                 }
                 // there are at least three trees in the heap, and current and next are of same rank
                 else
                 {
-//                    if (v_actions){//todo remove - only for debugging
-//                        System.out.println("2 - middle");
-//                    }
                     HeapNode nextNext = next.next; // save this because link changes next's!
                     current = HeapNode.link(current, next);
                     current.next = nextNext; // we do so that current will remain a valid start for the rest of the heap list.
@@ -376,37 +328,19 @@ public class BinomialHeap
                 }
             }
         }
-
-//        if(v_heaps) {//todo remove - only for debugging
-//            System.out.print("unionedHeap: ");
-//            if (!unionedHeap.empty()) {
-//                unionedHeap.last.next.printNodeList();
-//            } else {
-//                System.out.println();
-//            }
-//            System.out.print("current list: ");
-//            current.printNodeList();
-//            System.out.println("##########################");
-//        }
-
         // now concat unioned heap and the rest of this.heap (unionedHeap -> current -> this.Heap)
         if (unionedHeap.empty())
         {
             this.last.next = current;
-//            System.out.print("final heap list: ");//todo remove - only for debugging
-//            this.last.next.printNodeList();//todo remove - only for debugging
             return;
         }
         HeapNode firstNode = unionedHeap.last.next;
         unionedHeap.last.next = current;
         this.last.next = firstNode;
-//        System.out.print("final heap list: ");//todo remove - only for debugging
-//        this.last.next.printNodeList();//todo remove - only for debugging
-//        System.out.println("done union trees");//todo remove - only for debugging
     }
 
-        // Inserting a new binomial tree as the last root to an ordered heap
-        public void addHeapNode(HeapNode node)
+    // Inserting a new binomial tree as the last root to an ordered heap
+    public void addHeapNode(HeapNode node)
     {
         if (this.empty())
         {
@@ -438,14 +372,6 @@ public class BinomialHeap
         public HeapNode next;
         public HeapNode parent;
         public int rank;
-
-        public HeapNode() {
-            this.item = null;
-            this.child = null;
-            this.next = null;
-            this.parent = null;
-            this.rank = 0;
-        }
 
         public void printNodeList(){
             int maxNum = 20;
@@ -567,16 +493,16 @@ public class BinomialHeap
 
 
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
 
 
-        BinomialHeap heap1 = new BinomialHeap();
-        for (int i=0; i<128; i++) {
-            heap1.insert(10-i, String.valueOf(i));
-        }
-        heap1.print();
-        heap1.last.next.printNodeList();
-        System.out.println(heap1.numOfTrees);
+//        BinomialHeap heap1 = new BinomialHeap();
+//        for (int i=0; i<128; i++) {
+//            heap1.insert(10-i, String.valueOf(i));
+//        }
+//        heap1.print();
+//        heap1.last.next.printNodeList();
+//        System.out.println(heap1.numOfTrees);
 
         /*
         BinomialHeap heap2 = new BinomialHeap();
@@ -597,7 +523,21 @@ public class BinomialHeap
 //        heap3.print();
 //        System.out.println(heap3.last.next.item.key);
 
+        int[] insertions = { 5, 6, 7, 8, 4, 3, 2, 11 };
+        HashMap<Integer, BinomialHeap.HeapItem> keyToNode = new HashMap<>();
+        BinomialHeap bh = new BinomialHeap();
+        for (int i : insertions) {
+            keyToNode.put(i, bh.insert(i, null));
+        }
 
+        bh.delete(keyToNode.get(4));
+//        bh.print();
+//        bh.last.next.printNodeList();
+//        System.out.println(bh.numOfTrees);
+        bh.delete(keyToNode.get(8));
 
+        bh.print();
+        bh.last.next.printNodeList();
+        System.out.println(bh.numOfTrees);
     }
 }
