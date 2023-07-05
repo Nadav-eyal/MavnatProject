@@ -135,6 +135,8 @@ public class BinomialHeap
      */
     public HeapItem findMin()
     {
+        if (this.min.item == null)
+            return null;
         return this.min.item;
     }
 
