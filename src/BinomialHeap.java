@@ -208,6 +208,8 @@ public class BinomialHeap
             int unionUntilRank = this.merge(heap2);
             this.unionTrees(unionUntilRank);
         }
+        while (this.min.parent != null)
+            this.min = this.min.parent;
     }
 
 
@@ -505,97 +507,5 @@ public class BinomialHeap
             this.info = info;
             this.node = null;
         }
-    }
-
-    public void print() {
-        System.out.println("Binomial Heap:");
-        System.out.println("Size: " + size);
-
-        if (min != null) {
-            System.out.println("Minimum Node: " + min.item.key);
-        } else {
-            System.out.println("No minimum node.");
-        }
-
-        System.out.println("Heap Nodes:");
-        if (last != null) {
-            Set<HeapNode> visited = new HashSet<>();
-            printHeapNode(last, 0, visited);
-        } else {
-            System.out.println("No heap nodes.");
-        }
-    }
-
-    private void printHeapNode(HeapNode node, int indentLevel, Set<HeapNode> visited) {
-        StringBuilder indent = new StringBuilder();
-        for (int i = 0; i < indentLevel; i++) {
-            indent.append("    ");
-        }
-
-        System.out.println(indent + "Key: " + node.item.key);
-        System.out.println(indent + "Info: " + node.item.info);
-        System.out.println(indent + "Rank: " + node.rank);
-
-        visited.add(node);
-
-        if (node.child != null && !visited.contains(node.child)) {
-            System.out.println(indent + "Child:");
-            printHeapNode(node.child, indentLevel + 1, visited);
-        }
-
-        if (node.next != null && !visited.contains(node.next)) {
-            System.out.println(indent + "Sibling:");
-            printHeapNode(node.next, indentLevel, visited);
-        }
-    }
-
-
-
-    public static void main(String[] args) {
-
-
-//        BinomialHeap heap1 = new BinomialHeap();
-//        for (int i=0; i<128; i++) {
-//            heap1.insert(10-i, String.valueOf(i));
-//        }
-//        heap1.print();
-//        heap1.last.next.printNodeList();
-//        System.out.println(heap1.numOfTrees);
-
-        /*
-        BinomialHeap heap2 = new BinomialHeap();
-        for (int i=0; i<16; i++) {
-            //System.out.println("inserting " + (i));
-            heap2.insert(i, String.valueOf(i));
-        }
-
-
-
-         */
-
-//        BinomialHeap heap3 = new BinomialHeap();
-//        heap3.insert(3, "a");
-//        heap3.insert(2, "a");
-//        heap3.insert(1, "a");
-//        heap3.insert(0, "a");
-//        heap3.print();
-//        System.out.println(heap3.last.next.item.key);
-
-        int[] insertions = { 5, 6, 7, 8, 4, 3, 2, 11 };
-        HashMap<Integer, BinomialHeap.HeapItem> keyToNode = new HashMap<>();
-        BinomialHeap bh = new BinomialHeap();
-        for (int i : insertions) {
-            keyToNode.put(i, bh.insert(i, null));
-        }
-
-        bh.delete(keyToNode.get(4));
-//        bh.print();
-//        bh.last.next.printNodeList();
-//        System.out.println(bh.numOfTrees);
-        bh.delete(keyToNode.get(8));
-
-        bh.print();
-        bh.last.next.printNodeList();
-        System.out.println(bh.numOfTrees);
     }
 }
